@@ -1,7 +1,7 @@
-############################
-# Unity Generated Folders
-############################
-
+# This .gitignore file should be placed at the root of your Unity project directory
+#
+# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
+#
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -10,65 +10,32 @@
 [Ll]ogs/
 UserSettings/
 
-############################
-# Addressables / Cache
-############################
-
-/[Aa]ssets/StreamingAssets/aa*
-/[Aa]ssets/AddressableAssetsData/*
-
-############################
-# Visual Studio / Rider / IDE
-############################
-
 .vs/
 .idea/
+
+.gradle/
+
+MemoryCaptures/
+Recordings/
+
 *.csproj
-*.unityproj
 *.sln
-*.suo
-*.tmp
 *.user
 *.userprefs
-*.pidb
-*.booproj
-*.svd
 *.opendb
-*.VC.db
-
-############################
-# OS generated files
-############################
-
-.DS_Store
-Thumbs.db
-
-############################
-# Logs / Crash reports
-############################
 
 *.log
 sysinfo.txt
 mono_crash.*
-
-############################
-# Builds (optional safety)
-############################
 
 *.apk
 *.aab
 *.unitypackage
 *.app
 
-############################
-# JetBrains Rider
-############################
+.DS_Store
+Thumbs.db
 
 /Assets/Plugins/Editor/JetBrains*
-
-############################
-# Unity crash / debug data
-############################
-
-MemoryCaptures/
-Recordings/
+/Assets/StreamingAssets/aa*
+/Assets/AddressableAssetsData/*
