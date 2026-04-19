@@ -84,7 +84,7 @@ public class MusicManager : MonoBehaviour
 
     public void PlayGameOverMusic()
     {
-        musicSource.StopMusic(); // Stop current music
+        musicSource.Stop(); // Stop current music
         musicSource.clip = gameOverMusic;
         musicSource.Play(); // Play game over music
     }
