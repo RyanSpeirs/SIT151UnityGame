@@ -13,6 +13,9 @@ public class AudioManager : MonoBehaviour
     [Header("UI Sounds")]
     public AudioSource uiSfxPrefab;
     [Range(0f, 1f)] public float uiVolume = 1f;
+    public AudioSource heartbeatSource;
+    public AudioClip heartbeatClip;
+
 
     private const string SFX_KEY = "SFXVolume";
     private const string UI_KEY = "UIVolume";
@@ -31,8 +34,27 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    
-   
+    // Method to play the heartbeat sound
+    public void PlayHeartbeatSound()
+    {
+        if (heartbeatSource != null && heartbeatClip != null)
+        {
+            heartbeatSource.clip = heartbeatClip;
+            heartbeatSource.loop = true;
+            heartbeatSource.volume = 0.5f; // Adjust the volume as needed
+            heartbeatSource.Play();
+        }
+    }
+
+    // Method to stop the heartbeat sound
+    public void StopHeartbeatSound()
+    {
+        if (heartbeatSource != null)
+        {
+            heartbeatSource.Stop();
+        }
+    }
+
 
     // ------------------------
     // SFX Control

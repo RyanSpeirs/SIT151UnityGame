@@ -24,10 +24,13 @@ public class MusicManager : MonoBehaviour
     private float musicVolume = 1f;
     private float musicFadeMultiplier = 1f;
 
+    private float mufflingEffect = 1f;
+
     private Coroutine fadeRoutine;
 
     private const string MUSIC_KEY = "MusicVolume";
 
+    public GameState CurrentState { get; private set; } = GameState.Gameplay;
     void Awake()
     {
         if (Instance == null)
@@ -79,6 +82,13 @@ public class MusicManager : MonoBehaviour
             musicSource.Pause();
     }
 
+    public void PlayGameOverMusic()
+    {
+        musicSource.StopMusic(); // Stop current music
+        musicSource.clip = gameOverMusic;
+        musicSource.Play(); // Play game over music
+    }
+
     // ------------------------
     // Volume Control
     // ------------------------
@@ -98,22 +108,27 @@ public class MusicManager : MonoBehaviour
     // ------------------------
     // Game State Management
     // ------------------------
-
     public void SetGameState(GameState state)
     {
+        CurrentState = state;  // Set the CurrentState to the new state
+
         switch (state)
         {
             case GameState.Gameplay:
                 musicFadeMultiplier = gameplayMultiplier;
+                PlayMusic(gameplayMusic);  // Play gameplay music when in gameplay state
                 break;
             case GameState.Pause:
                 musicFadeMultiplier = pauseMultiplier;
+                PlayMusic(pauseMusic);  // Play pause music when in pause state
                 break;
             case GameState.GameOver:
                 musicFadeMultiplier = gameOverMultiplier;
+                PlayMusic(gameOverMusic);  // Play game over music when in game over state
                 break;
             default:
                 musicFadeMultiplier = defaultMusicMultiplier;
+                PlayMusic(mainmenuMusic);  // Default to main menu music
                 break;
         }
 
@@ -172,5 +187,19 @@ public class MusicManager : MonoBehaviour
 
         musicFadeMultiplier = targetMultiplier;
         ApplyMusicVolume();
+    }
+
+    public void ApplyMufflingEffect(float mufflingAmount)
+    {
+        mufflingEffect = Mathf.Clamp01(mufflingAmount); // Clamp to 0-1 range
+        musicSource.volume = musicVolume * mufflingEffect; // Reduce volume based on effect
+        // You can add additional audio effects here (e.g., low pass filter)
+    }
+
+    // Remove the muffling effect and restore normal volume
+    public void RemoveMufflingEffect()
+    {
+        mufflingEffect = 1f;
+        musicSource.volume = musicVolume; // Restore original volume
     }
 }

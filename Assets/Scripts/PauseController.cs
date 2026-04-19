@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static MusicManager;
 
 
 public class PauseController : MonoBehaviour
 {
-    public static bool IsPaused { get; private set; }
+
+
+    public static bool IsPaused => MusicManager.Instance.CurrentState == MusicManager.GameState.Pause;
 
     [Header("UI References")]
     public GameObject pauseMenuPanel;
@@ -71,7 +74,7 @@ public class PauseController : MonoBehaviour
 
     public void Pause()
     {
-        IsPaused = true;
+        MusicManager.Instance.SetGameState(MusicManager.GameState.Pause);
         currentMenu = MenuState.Pause;
 
         Time.timeScale = 0f;
@@ -90,7 +93,7 @@ public class PauseController : MonoBehaviour
 
     public void Resume()
     {
-        IsPaused = false;
+        MusicManager.Instance.SetGameState(MusicManager.GameState.Gameplay);
         currentMenu = MenuState.Gameplay;
         Time.timeScale = 1f;
 
