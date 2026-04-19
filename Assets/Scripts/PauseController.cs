@@ -16,8 +16,18 @@ public class PauseController : MonoBehaviour
     {
         if (InputManager.Instance != null && InputManager.Instance.PausePressed)
         {
-            if (IsPaused) Resume();
-            else Pause();
+            
+            if (currentMenu == MenuState.Options)
+            {
+                OnBackPressed();
+                return;
+            }
+
+           
+            if (IsPaused)
+                Resume();
+            else
+                Pause();
         }
     }
 
@@ -28,16 +38,24 @@ public class PauseController : MonoBehaviour
 
     public void OnOptionsPressed()
     {
-        previousMenu = currentMenu;
         currentMenu = MenuState.Options;
-
-        pauseMenuPanel.SetActive(false);
-        optionsPanel.SetActive(true);
+        if (pauseMenuPanel != null) 
+            pauseMenuPanel.SetActive(false);
+        if (optionsPanel != null)
+            optionsPanel.SetActive(true);
     }
 
     public void OnBackPressed()
     {
-        ReturnToPreviousMenu();
+        switch (currentMenu)
+        {
+            case MenuState.Options:
+                currentMenu = MenuState.Pause;
+
+                optionsPanel.SetActive(false);
+                pauseMenuPanel.SetActive(true);
+                break;
+        }
     }
 
     public void OnQuitPressed()
@@ -54,11 +72,15 @@ public class PauseController : MonoBehaviour
     public void Pause()
     {
         IsPaused = true;
+        currentMenu = MenuState.Pause;
 
         Time.timeScale = 0f;
 
         if (pauseMenuPanel != null)
             pauseMenuPanel.SetActive(true);
+
+        if (optionsPanel != null)
+            optionsPanel.SetActive(false);
 
         if (hudPanel != null)
             hudPanel.SetActive(false);
@@ -69,11 +91,14 @@ public class PauseController : MonoBehaviour
     public void Resume()
     {
         IsPaused = false;
-
+        currentMenu = MenuState.Gameplay;
         Time.timeScale = 1f;
 
         if (pauseMenuPanel != null)
             pauseMenuPanel.SetActive(false);
+
+        if(optionsPanel != null)
+            optionsPanel.SetActive(false);
 
         if (hudPanel != null)
             hudPanel.SetActive(true);
@@ -83,30 +108,13 @@ public class PauseController : MonoBehaviour
 
     private enum MenuState
     {
-        None,
+        Gameplay,
         Pause, 
         Options
     }
 
-    private MenuState currentMenu = MenuState.None;
-    private MenuState previousMenu = MenuState.None;
+    private MenuState currentMenu = MenuState.Gameplay;
 
-    private void ReturnToPreviousMenu()
-    {
-        if (currentMenu == MenuState.Options)
-        {
-            optionsPanel.SetActive(false);
-        }
-
-        currentMenu = previousMenu;
-
-        switch (previousMenu)
-        {
-            case MenuState.Pause:
-                pauseMenuPanel.SetActive(true);
-                break;
-        }
-    }
 
     private enum InputMode
     {

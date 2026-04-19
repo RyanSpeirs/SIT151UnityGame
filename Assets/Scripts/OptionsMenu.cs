@@ -13,7 +13,7 @@ public class OptionsMenu : MonoBehaviour
     void Start()
     {
         // Set initial values
-        musicSlider.value = AudioManager.Instance.musicVolume;
+        musicSlider.value = MusicManager.Instance.MusicVolume;
         sfxSlider.value = AudioManager.Instance.sfxVolume;
         uiSlider.value = AudioManager.Instance.uiVolume;
 
@@ -25,7 +25,7 @@ public class OptionsMenu : MonoBehaviour
 
     public void OnMusicChanged(float value)
     {
-        AudioManager.Instance.SetMusicVolume(value);
+        MusicManager.Instance.SetMusicVolume(value);
     }
 
     public void OnSFXChanged(float value)
@@ -41,5 +41,6 @@ public class OptionsMenu : MonoBehaviour
     public void Apply()
     {
         AudioManager.Instance.SaveSettings();
+        MusicManager.Instance.SaveSettings();
     }
 }

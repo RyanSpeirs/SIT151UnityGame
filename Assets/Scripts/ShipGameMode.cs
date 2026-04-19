@@ -15,9 +15,8 @@ public class ShipGameMode : MonoBehaviour
     public TextMeshProUGUI healthDisplay;
     public Slider healthBar;
 
-    public AudioSource backgroundAudioSource;
+    
     public AudioClip gameOverFlourish;
-    public AudioSource gameOverAudioSource;
     public bool hasPlayedGameOverSound = false;
 
     public int itemsCollected = 0;
