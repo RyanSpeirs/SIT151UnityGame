@@ -14,9 +14,10 @@ public class MusicManager : MonoBehaviour
     [Header("Track Balance")]
     public float defaultMusicMultiplier = 1f;
     public float gameplayMultiplier = 0.8f;
-    public float pauseMultiplier = 0.8f;
+    public float pauseMultiplier = 1f;
     public float gameOverMultiplier = 1.2f;
     public float mainmenuMultiplier = 1.0f;
+
 
     public AudioClip mainmenuMusic;
     public AudioClip gameplayMusic;
