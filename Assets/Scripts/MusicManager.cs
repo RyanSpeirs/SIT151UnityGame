@@ -8,12 +8,14 @@ public class MusicManager : MonoBehaviour
 
     [Header ("Music Sources")]
     public AudioSource musicSource;
+    public AudioSource gameplaySouce;
+    public AudioSource pauseSource;
 
     [Header("Track Balance")]
     public float defaultMusicMultiplier = 1f;
-    public float gameplayMultiplier = 0.6f;
+    public float gameplayMultiplier = 0.8f;
     public float pauseMultiplier = 0.8f;
-    public float gameOverMultiplier = 1.0f;
+    public float gameOverMultiplier = 1.2f;
     public float mainmenuMultiplier = 1.0f;
 
     public AudioClip mainmenuMusic;
@@ -37,6 +39,7 @@ public class MusicManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            musicSource = GetComponent<AudioSource>();
             LoadSettings();
         }
         else
@@ -46,15 +49,18 @@ public class MusicManager : MonoBehaviour
         }
     }
 
+
+    public void Start()
+    {
+        ApplyMusicVolume();
+        SetGameState(GameState.Gameplay);
+    }
     public float MusicVolume
     {
         get { return musicVolume; }
         set { musicVolume = Mathf.Clamp01(value); }
     }
-    void Start()
-    {
-        ApplyMusicVolume();
-    }
+    
 
     // ------------------------
     // Music Control
@@ -82,12 +88,6 @@ public class MusicManager : MonoBehaviour
             musicSource.Pause();
     }
 
-    public void PlayGameOverMusic()
-    {
-        musicSource.Stop(); // Stop current music
-        musicSource.clip = gameOverMusic;
-        musicSource.Play(); // Play game over music
-    }
 
     // ------------------------
     // Volume Control
@@ -111,9 +111,13 @@ public class MusicManager : MonoBehaviour
     public void SetGameState(GameState state)
     {
         CurrentState = state;  // Set the CurrentState to the new state
-
+        Debug.Log("Music state set to: " + state);
         switch (state)
         {
+            case GameState.MainMenu:
+                musicFadeMultiplier = mainmenuMultiplier;
+                PlayMusic(mainmenuMusic); // Play main menu music explicitly
+                break;
             case GameState.Gameplay:
                 musicFadeMultiplier = gameplayMultiplier;
                 PlayMusic(gameplayMusic);  // Play gameplay music when in gameplay state
@@ -128,7 +132,7 @@ public class MusicManager : MonoBehaviour
                 break;
             default:
                 musicFadeMultiplier = defaultMusicMultiplier;
-                PlayMusic(mainmenuMusic);  // Default to main menu music
+                PlayMusic(mainmenuMusic);  // Default to main menu music if something doesn't match up
                 break;
         }
 
@@ -137,6 +141,7 @@ public class MusicManager : MonoBehaviour
 
     public enum GameState
     {
+        MainMenu,
         Gameplay,
         Pause,
         GameOver

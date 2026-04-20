@@ -19,7 +19,7 @@ public class ItemAction : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log("Triggering with: " + other.name);
+        //  Debug.Log("Triggering with: " + other.name);
         if (other.gameObject.CompareTag("Player"))
         {
             transform.position = Vector3.Lerp(transform.position, other.gameObject.transform.position, 0.01f);

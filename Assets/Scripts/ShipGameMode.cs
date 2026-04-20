@@ -51,13 +51,16 @@ public class ShipGameMode : MonoBehaviour
         // If the Game Over flag flips true, trigger the Text display
         gameOverDisplay.gameObject.SetActive(gameOver);
 
+        Debug.Log("MusicManager: " + MusicManager.Instance);
+        Debug.Log("AudioManager: " + AudioManager.Instance);
+
         if (gameOver && !hasPlayedGameOverSound)
         {
             // Stop the gameplay music (handled by MusicManager)
-            MusicManager.Instance.PlayGameOverMusic();
+            MusicManager.Instance.SetGameState(MusicManager.GameState.GameOver);
 
             // Optionally, play any additional game over flourish sound
-            if (gameOverFlourish != null)
+            if (gameOverFlourish != null && AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX(gameOverFlourish);
             }

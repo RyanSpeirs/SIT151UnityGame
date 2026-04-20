@@ -22,7 +22,7 @@ public class EnemyBasic : EnemyBase
             Destroy(this.gameObject);
         }
 
-        Debug.Log(Time.timeScale);
+        //  Debug.Log(Time.timeScale);
 
     }
 
