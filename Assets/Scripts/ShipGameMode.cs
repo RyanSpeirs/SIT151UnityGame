@@ -83,14 +83,14 @@ public class ShipGameMode : MonoBehaviour
                 AudioManager.Instance.PlayHeartbeatSound();
             }
             // Apply muffling effect to music
-            MusicManager.Instance.ApplyMufflingEffect(0.2f); // Reduce music volume and apply effect
+           
         }
         else
         {
             // Stop heartbeat sound if health is above threshold
             AudioManager.Instance.StopHeartbeatSound();
             // Remove muffling effect from music
-            MusicManager.Instance.RemoveMufflingEffect();
+            
         }
     }
 

@@ -27,7 +27,7 @@ public class MusicManager : MonoBehaviour
     private float musicVolume = 1f;
     private float musicFadeMultiplier = 1f;
 
-    private float mufflingEffect = 1f;
+    public AudioLowPassFilter gameplayFilter;
 
     private Coroutine fadeRoutine;
 
@@ -199,17 +199,20 @@ public class MusicManager : MonoBehaviour
         ApplyMusicVolume();
     }
 
-    public void ApplyMufflingEffect(float mufflingAmount)
+    public void SetStress(float t)
     {
-        mufflingEffect = Mathf.Clamp01(mufflingAmount); // Clamp to 0-1 range
-        musicSource.volume = musicVolume * mufflingEffect; // Reduce volume based on effect
-        // You can add additional audio effects here (e.g., low pass filter)
+        // volume
+        float targetVolume = Mathf.Lerp(1f, 0.4f, t);
+        musicSource.volume = musicVolume * targetVolume * musicFadeMultiplier;
+
+        // low-pass (if filter is on SAME source)
+        if (gameplayFilter != null)
+        {
+            gameplayFilter.cutoffFrequency =
+                Mathf.Lerp(22000f, 500f, t);
+        }
     }
 
-    // Remove the muffling effect and restore normal volume
-    public void RemoveMufflingEffect()
-    {
-        mufflingEffect = 1f;
-        musicSource.volume = musicVolume; // Restore original volume
-    }
+
+
 }
