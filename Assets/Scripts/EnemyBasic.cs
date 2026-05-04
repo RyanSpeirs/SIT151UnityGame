@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class EnemyBasic : EnemyBase
 {   
-    public RuntimeAnimatorController explosion;
+    // public RuntimeAnimatorController explosion;
 
     //  because we're using DeltaTime we need to change how enemy movement works so it pauses etc
-    public float speed = 0.5f;
+    public float movementSpeed = 0.5f;
     public Vector3 direction = Vector3.down;
 
     // Update is called once per frame
     void Update()
     {
         // makes the enemy ships fall downwards
-        transform.position += direction * speed * Time.deltaTime;
+        transform.position += direction * movementSpeed * Time.deltaTime;
 
         // if they fall off the screen, they are destroyed
         if (transform.position.y < -5.0f )

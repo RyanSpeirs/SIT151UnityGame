@@ -12,35 +12,48 @@ public class OptionsMenu : MonoBehaviour
 
     void Start()
     {
+       
+    }
+
+    public void OnEnable()
+    {
         // Set initial values
         musicSlider.value = MusicManager.Instance.MusicVolume;
         sfxSlider.value = AudioManager.Instance.sfxVolume;
         uiSlider.value = AudioManager.Instance.uiVolume;
 
-        // Hook events
-        musicSlider.onValueChanged.AddListener(OnMusicChanged);
-        sfxSlider.onValueChanged.AddListener(OnSFXChanged);
-        uiSlider.onValueChanged.AddListener(OnUIChanged);
+      
     }
 
     public void OnMusicChanged(float value)
     {
         MusicManager.Instance.SetMusicVolume(value);
+        MusicManager.Instance.SaveSettings();
     }
 
     public void OnSFXChanged(float value)
     {
         AudioManager.Instance.SetSFXVolume(value);
+        AudioManager.Instance.SaveSettings();
     }
 
     public void OnUIChanged(float value)
     {
         AudioManager.Instance.SetUIVolume(value);
+        AudioManager.Instance.SaveSettings();
     }
 
-    public void Apply()
+   
+
+    void Awake()
     {
-        AudioManager.Instance.SaveSettings();
-        MusicManager.Instance.SaveSettings();
+        musicSlider.onValueChanged.RemoveAllListeners();
+        sfxSlider.onValueChanged.RemoveAllListeners();  
+        uiSlider.onValueChanged.RemoveAllListeners();   
+
+        // Hook events
+        musicSlider.onValueChanged.AddListener(OnMusicChanged);
+        sfxSlider.onValueChanged.AddListener(OnSFXChanged);
+        uiSlider.onValueChanged.AddListener(OnUIChanged);
     }
 }

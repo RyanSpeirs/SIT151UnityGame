@@ -61,7 +61,7 @@ public class MusicManager : MonoBehaviour
         get { return musicVolume; }
         set { musicVolume = Mathf.Clamp01(value); }
     }
-    
+
 
     // ------------------------
     // Music Control
@@ -70,6 +70,9 @@ public class MusicManager : MonoBehaviour
     public void PlayMusic(AudioClip clip, bool loop = true)
     {
         if (musicSource == null || clip == null) return;
+
+        //  Prevent the song from resetting
+        if (musicSource.clip == clip && musicSource.isPlaying) return;
 
         musicSource.clip = clip;
         musicSource.loop = loop;
@@ -128,8 +131,9 @@ public class MusicManager : MonoBehaviour
                 PlayMusic(pauseMusic);  // Play pause music when in pause state
                 break;
             case GameState.GameOver:
+                musicSource.Stop();
                 musicFadeMultiplier = gameOverMultiplier;
-                PlayMusic(gameOverMusic);  // Play game over music when in game over state
+                PlayMusic(gameOverMusic, false);  // Play game over music when in game over state
                 break;
             default:
                 musicFadeMultiplier = defaultMusicMultiplier;

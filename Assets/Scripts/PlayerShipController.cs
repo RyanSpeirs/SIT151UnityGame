@@ -20,39 +20,39 @@ public class PlayerShipController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       /*
-        // spawns bullets when pressedw
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (!gameMode.gameOver) //  stop bullets spawning when the ship is destroyed
-            {
-                GameObject bullet = Instantiate(bulletTemplate, transform.position + new Vector3(0.0f, 0.6f, 0.0f), transform.rotation);
-                GetComponent<AudioSource>().Play();
-            }
-        }
-
-        // directional movement, hard-coded to the WASD
-        if (Input.GetKey(KeyCode.A))
+        /*
+         // spawns bullets when pressedw
+         if (Input.GetKeyDown(KeyCode.Space))
          {
-             transform.position += new Vector3(-0.01f, 0.0f, 0.0f);
+             if (!gameMode.gameOver) //  stop bullets spawning when the ship is destroyed
+             {
+                 GameObject bullet = Instantiate(bulletTemplate, transform.position + new Vector3(0.0f, 0.6f, 0.0f), transform.rotation);
+                 GetComponent<AudioSource>().Play();
+             }
          }
 
-         if (Input.GetKey(KeyCode.D))
-         {
-             transform.position += new Vector3(+0.01f, 0.0f, 0.0f);
-         }
+         // directional movement, hard-coded to the WASD
+         if (Input.GetKey(KeyCode.A))
+          {
+              transform.position += new Vector3(-0.01f, 0.0f, 0.0f);
+          }
 
-         if (Input.GetKey(KeyCode.W))
-         {
-             transform.position += new Vector3(0.00f, +0.01f, 0.0f);
-         }
+          if (Input.GetKey(KeyCode.D))
+          {
+              transform.position += new Vector3(+0.01f, 0.0f, 0.0f);
+          }
 
-         if (Input.GetKey(KeyCode.S))
-         {
-             transform.position += new Vector3(0.00f, -0.01f, 0.0f);
-         }  */
+          if (Input.GetKey(KeyCode.W))
+          {
+              transform.position += new Vector3(0.00f, +0.01f, 0.0f);
+          }
 
-        if (gameMode.gameOver) return;
+          if (Input.GetKey(KeyCode.S))
+          {
+              transform.position += new Vector3(0.00f, -0.01f, 0.0f);
+          }  */
+
+        if (gameMode != null && gameMode.gameOver) return;
 
         // --- FIRE ---
         if (InputManager.Instance != null && InputManager.Instance.FirePressed)
@@ -87,7 +87,7 @@ public class PlayerShipController : MonoBehaviour
 
             if (health <= 0.0f)
             {
-                gameMode.gameOver = true; // switch game over flag to true
+                gameMode.TriggerGameOver(); // switch game over flag to true
 
                 GetComponent<Collider>().enabled = false;
 
