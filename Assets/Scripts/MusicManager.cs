@@ -27,6 +27,7 @@ public class MusicManager : MonoBehaviour
     private float musicVolume = 1f;
     private float musicFadeMultiplier = 1f;
 
+    public AudioSource gameplaySource;
     public AudioLowPassFilter gameplayFilter;
 
     private Coroutine fadeRoutine;

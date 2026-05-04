@@ -8,6 +8,7 @@ public class AudioStressController : MonoBehaviour
     public PlayerShipController player;
     public AudioSource heartbeatSource;
     public AudioLowPassFilter musicLowPass;
+    public AudioClip heartbeatClip;
 
     [Header("Heartbeat Settings")]
     public float heartbeatStartHP = 50f;
@@ -73,7 +74,7 @@ public class AudioStressController : MonoBehaviour
             float volume = Mathf.Lerp(0.3f, 1f, heartbeatIntensity);
             heartbeatSource.volume = volume;
 
-            heartbeatSource.Play();
+            heartbeatSource.PlayOneShot(heartbeatClip, volume);
 
             float delay = Mathf.Lerp(minHeartbeatRate, maxHeartbeatRate, heartbeatIntensity);
             yield return new WaitForSeconds(delay);

@@ -4311,6 +4311,7 @@ MonoBehaviour:
   player: {fileID: 1068053872}
   heartbeatSource: {fileID: 382477574}
   musicLowPass: {fileID: 1712237539}
+  heartbeatClip: {fileID: 8300000, guid: 6cda3987e2e39a746a61907d4d881701, type: 3}
   heartbeatStartHP: 50
   maxHeartbeatRate: 0.25
   minHeartbeatRate: 1.2
@@ -7132,6 +7133,8 @@ MonoBehaviour:
   gameplayMusic: {fileID: 8300000, guid: 54b5354c7ca1d044e92c82487cb06408, type: 3}
   pauseMusic: {fileID: 8300000, guid: 40e2661c809dd0249ba2018ccd2a0ae2, type: 3}
   gameOverMusic: {fileID: 8300000, guid: 9706ffacf5821df459c0ce79732f5464, type: 3}
+  gameplaySource: {fileID: 0}
+  gameplayFilter: {fileID: 0}
 --- !u!169 &1712237539
 AudioLowPassFilter:
   m_ObjectHideFlags: 0
