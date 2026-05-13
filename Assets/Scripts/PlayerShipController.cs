@@ -10,11 +10,16 @@ public class PlayerShipController : MonoBehaviour
     public ShipGameMode gameMode;
     private AudioSource audioSource;
 
+    private Camera mainCamera;
+
+    [SerializeField]
+    private float screenPadding = 0.5f;
 
     // Start is called before the first frame update
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        mainCamera = Camera.main;
     }
 
     // Update is called once per frame
@@ -74,6 +79,29 @@ public class PlayerShipController : MonoBehaviour
         Vector3 direction = new Vector3(input.x, input.y, 0f);
         transform.position += direction * speed * Time.deltaTime;
 
+        // --- CLAMP TO CAMERA ---
+
+        Vector3 pos = transform.position;
+
+        // Camera world bounds
+        float camHeight = mainCamera.orthographicSize;
+        float camWidth = camHeight * mainCamera.aspect;
+
+        // Clamp player inside visible area
+        pos.x = Mathf.Clamp(
+            pos.x,
+            mainCamera.transform.position.x - camWidth + screenPadding,
+            mainCamera.transform.position.x + camWidth - screenPadding
+        );
+
+        pos.y = Mathf.Clamp(
+            pos.y,
+            mainCamera.transform.position.y - camHeight + screenPadding,
+            mainCamera.transform.position.y + camHeight - screenPadding
+        );
+
+        transform.position = pos;
+
     }
 
     void OnCollisionEnter(Collision collisionInfo)
@@ -82,8 +110,11 @@ public class PlayerShipController : MonoBehaviour
         { 
             health = health - 05.0f; // updates health
             Debug.Log("Current Health: " + health + ". Collision with: " + collisionInfo.gameObject.name);
-            EnemyBasic enemy = collisionInfo.gameObject.GetComponent<EnemyBasic>(); // gets the collision info from the enemy ship class
-            StartCoroutine(enemy.destroyActor(null)); // blows up the enemy ship
+            EnemyBase enemy = collisionInfo.gameObject.GetComponent<EnemyBase>(); // gets the collision info from the enemy base class
+            if (enemy != null)
+            {
+                enemy.Die(); // tells objects with EnemyBase to die
+            } 
 
             if (health <= 0.0f)
             {
