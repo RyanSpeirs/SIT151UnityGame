@@ -30,6 +30,8 @@ public class InputManager : MonoBehaviour
                 }
             }
         }
+
+       
     }
 
     private void ApplyRebind(KeyCode newKey)

@@ -2,14 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance;
 
     [Header ("Music Sources")]
-    public AudioSource musicSource;
-    public AudioSource gameplaySouce;
-    public AudioSource pauseSource;
+    public AudioSource gameplaySource;
+    public AudioSource secondarySource;
+
+    [Header("Level Music Database")]
+    public List<LevelAudioProfile> levelProfiles;
+
 
     [Header("Track Balance")]
     public float defaultMusicMultiplier = 1f;
@@ -18,6 +22,7 @@ public class MusicManager : MonoBehaviour
     public float gameOverMultiplier = 1.2f;
     public float mainmenuMultiplier = 1.0f;
 
+    private bool gameplayWasPaused;
 
     public AudioClip mainmenuMusic;
     public AudioClip gameplayMusic;
@@ -26,8 +31,8 @@ public class MusicManager : MonoBehaviour
 
     private float musicVolume = 1f;
     private float musicFadeMultiplier = 1f;
-
-    public AudioSource gameplaySource;
+    private AudioClip lastOneShotClip;
+    
     public AudioLowPassFilter gameplayFilter;
 
     private Coroutine fadeRoutine;
@@ -41,7 +46,7 @@ public class MusicManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            musicSource = GetComponent<AudioSource>();
+            
             LoadSettings();
         }
         else
@@ -55,7 +60,7 @@ public class MusicManager : MonoBehaviour
     public void Start()
     {
         ApplyMusicVolume();
-        SetGameState(GameState.Gameplay);
+       
     }
     public float MusicVolume
     {
@@ -68,29 +73,86 @@ public class MusicManager : MonoBehaviour
     // Music Control
     // ------------------------
 
-    public void PlayMusic(AudioClip clip, bool loop = true)
+    public void PlayGameplayMusic(AudioClip clip, bool loop = true)
     {
-        if (musicSource == null || clip == null) return;
+        if (gameplaySource == null || clip == null) return;
 
-        //  Prevent the song from resetting
-        if (musicSource.clip == clip && musicSource.isPlaying) return;
+        gameplaySource.loop = loop;
 
-        musicSource.clip = clip;
-        musicSource.loop = loop;
+        // If switching track
+        if (gameplaySource.clip != clip)
+        {
+            gameplaySource.clip = clip;
+            gameplayWasPaused = false;
+            gameplaySource.Play();
+            ApplyMusicVolume();
+            return;
+        }
+
+        // If resuming from pause
+        if (gameplayWasPaused)
+        {
+            gameplayWasPaused = false;
+            gameplaySource.UnPause();
+            return;
+        }
+
+        // Already playing
+        if (gameplaySource.isPlaying)
+            return;
+
+        // Fresh start fallback
+        gameplaySource.Play();
         ApplyMusicVolume();
-        musicSource.Play();
     }
 
-    public void StopMusic()
+    public void PlaySecondaryMusic(AudioClip clip, bool loop = true)
     {
-        if (musicSource != null)
-            musicSource.Stop();
+        if (secondarySource == null || clip == null) return;
+
+        // Prevent replaying one-shot clips
+        if (!loop && lastOneShotClip == clip && secondarySource.isPlaying == false)
+            return;
+
+        if (secondarySource.clip == clip && secondarySource.isPlaying)
+            return;
+
+        secondarySource.clip = clip;
+        secondarySource.loop = loop;
+
+        if (!loop)
+            lastOneShotClip = clip;
+
+        ApplyMusicVolume();
+        secondarySource.Play();
+    }
+
+    public bool IsSecondaryMusicPlaying()
+    {
+        return secondarySource != null && secondarySource.isPlaying;
+    }
+
+    private void StopAllMusic()
+    {
+        gameplaySource.Stop();
+        secondarySource.Stop();
     }
 
     public void PauseMusic()
     {
-        if (musicSource != null)
-            musicSource.Pause();
+        if (gameplaySource.isPlaying)
+        {
+            gameplaySource.Pause();
+            gameplayWasPaused = true;
+        }
+    }
+
+    public void ResumeMusic()
+    {
+        if (gameplaySource != null)
+        {
+            gameplaySource.UnPause();
+        }
     }
 
 
@@ -106,52 +168,105 @@ public class MusicManager : MonoBehaviour
 
     private void ApplyMusicVolume()
     {
-        if (musicSource != null)
-            musicSource.volume = musicVolume * musicFadeMultiplier;
+        if (gameplaySource != null)
+        {
+            gameplaySource.volume =
+                musicVolume *
+                musicFadeMultiplier;
+        }
+
+        if (secondarySource != null)
+        {
+            secondarySource.volume =
+                musicVolume *
+                musicFadeMultiplier;
+        }
+
+        Debug.Log("Secondary volume: " + secondarySource.volume);
     }
 
     // ------------------------
     // Game State Management
     // ------------------------
-    public void SetGameState(GameState state)
+    public void ApplyState(GameState state)
     {
-        CurrentState = state;  // Set the CurrentState to the new state
-        Debug.Log("Music state set to: " + state);
         switch (state)
         {
             case GameState.MainMenu:
-                musicFadeMultiplier = mainmenuMultiplier;
-                PlayMusic(mainmenuMusic); // Play main menu music explicitly
+                PlaySecondaryMusic(mainmenuMusic);
                 break;
+
             case GameState.Gameplay:
-                musicFadeMultiplier = gameplayMultiplier;
-                PlayMusic(gameplayMusic);  // Play gameplay music when in gameplay state
-                break;
+                {
+
+                    secondarySource.Stop();
+                    
+                  
+                    if (gameplayWasPaused)
+                    {
+                        gameplayWasPaused = false;
+                        gameplaySource.UnPause();
+                    }
+                    else
+                    {
+                        if (!gameplaySource.isPlaying)
+                        {
+                            gameplaySource.clip = gameplayMusic;
+                            gameplaySource.loop = true;
+                            gameplaySource.Play();
+                        }
+                    }
+
+                    if (gameplayFilter != null)
+                    {
+                        gameplayFilter.enabled = false;
+                    }
+                    break;
+                }
+
             case GameState.Pause:
-                musicFadeMultiplier = pauseMultiplier;
-                PlayMusic(pauseMusic);  // Play pause music when in pause state
-                break;
+                {
+                    Debug.Log("PAUSE MUSIC START");
+
+                    // Pause gameplay once
+                    if (gameplaySource.isPlaying)
+                    {
+                        gameplaySource.Pause();
+                        gameplayWasPaused = true;
+                    }
+
+                    // ALWAYS ensure pause music plays correctly
+                    if (secondarySource.clip != pauseMusic)
+                    {
+                        secondarySource.Stop();
+                        secondarySource.clip = pauseMusic;
+                        secondarySource.loop = true;
+                        secondarySource.Play();
+                    }
+                    else
+                    {
+                        // If it's not playing for ANY reason, restart it
+                        if (!secondarySource.isPlaying)
+                        {
+                            secondarySource.time = 0f; // optional reset for consistency
+                            secondarySource.Play();
+                        }
+                    }
+
+                    gameplayFilter.enabled = false;
+                    break;
+                }
+
             case GameState.GameOver:
-                musicSource.Stop();
-                musicFadeMultiplier = gameOverMultiplier;
-                PlayMusic(gameOverMusic, false);  // Play game over music when in game over state
-                break;
-            default:
-                musicFadeMultiplier = defaultMusicMultiplier;
-                PlayMusic(mainmenuMusic);  // Default to main menu music if something doesn't match up
+                StopAllMusic();
+                PlaySecondaryMusic(gameOverMusic, false);
                 break;
         }
 
         ApplyMusicVolume();
     }
 
-    public enum GameState
-    {
-        MainMenu,
-        Gameplay,
-        Pause,
-        GameOver
-    }
+
 
     // ------------------------
     // Save / Load
@@ -169,12 +284,12 @@ public class MusicManager : MonoBehaviour
     }
 
     // ------------------------
-    // Fade System (Optional)
+    // Fade System (optional, may be implemented later)
     // ------------------------
 
     public void FadeMusic(float targetMultiplier, float duration)
     {
-        if (musicSource == null) return;
+        if (gameplaySource == null || secondarySource == null) return;
 
         if (fadeRoutine != null)
             StopCoroutine(fadeRoutine);
@@ -200,20 +315,64 @@ public class MusicManager : MonoBehaviour
         ApplyMusicVolume();
     }
 
+    //-----------------------------------
+    //      Stress (Heartbeat effect)
+    //-----------------------------------
+
     public void SetStress(float t)
     {
-        // volume
-        float targetVolume = Mathf.Lerp(1f, 0.4f, t);
-        musicSource.volume = musicVolume * targetVolume * musicFadeMultiplier;
+        if (CurrentState != GameState.Gameplay)
+            return;
 
-        // low-pass (if filter is on SAME source)
+        float targetVolume =
+            Mathf.Lerp(1f, 0.4f, t);
+
+        gameplaySource.volume =
+            musicVolume *
+            targetVolume *
+            musicFadeMultiplier;
+
         if (gameplayFilter != null)
         {
+            gameplayFilter.enabled = true;
+
             gameplayFilter.cutoffFrequency =
                 Mathf.Lerp(22000f, 500f, t);
         }
     }
 
+    //---------------------------------------------------
+    //      Level Selection (defines gameplay track based on the level active)
+    //---------------------------------------------------
+    public void SetLevel(string levelName)
+    {
+        var profile = levelProfiles.Find(p => p.levelName == levelName);
+
+        if (profile != null)
+        {
+            gameplayMusic = profile.gameplayMusic;
+        }
+    }
+
+    public void ResetAudioState()
+    {
+        gameplaySource.Stop();
+        secondarySource.Stop();
+
+        gameplayWasPaused = false;
+        musicFadeMultiplier = 1f;
+
+        if (gameplayFilter != null)
+            gameplayFilter.cutoffFrequency = 22000f;
+    }
+
+    public void StopAllSecondaryMusic()
+    {
+        if (secondarySource == null) return;
+
+        secondarySource.Stop();
+        secondarySource.clip = null;
+    }
 
 
 }

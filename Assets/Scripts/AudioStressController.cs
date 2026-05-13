@@ -39,6 +39,11 @@ public class AudioStressController : MonoBehaviour
         UpdateMusicFilter(hp);
     }
 
+    void Awake()
+    {
+        Debug.Log("AudioStressController AWAKE on: " + gameObject.name);
+    }
+
     // --------------------------
     // HEARTBEAT SYSTEM
     // --------------------------
@@ -107,5 +112,22 @@ public class AudioStressController : MonoBehaviour
             targetCutoff,
             Time.deltaTime * smoothingSpeed
         );
+    }
+
+    public void ResetHeartbeat()
+    {
+        if (heartbeatRoutine != null)
+        {
+            StopCoroutine(heartbeatRoutine);
+            heartbeatRoutine = null;
+        }
+
+        heartbeatActive = false;
+        heartbeatIntensity = 0f;
+
+        if (heartbeatSource != null)
+        {
+            heartbeatSource.Stop();
+        }
     }
 }

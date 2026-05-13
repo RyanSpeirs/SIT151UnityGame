@@ -8,7 +8,7 @@ public class PauseController : MonoBehaviour
 {
 
 
-    public static bool IsPaused => MusicManager.Instance.CurrentState == MusicManager.GameState.Pause;
+    public static bool IsPaused => MusicManager.Instance.CurrentState == GameState.Pause;
 
     [Header("UI References")]
     public GameObject pauseMenuPanel;
@@ -17,26 +17,31 @@ public class PauseController : MonoBehaviour
 
     void Update()
     {
-        if (InputManager.Instance != null && InputManager.Instance.PausePressed)
-        {
-            
-            if (currentMenu == MenuState.Options)
-            {
-                OnBackPressed();
-                return;
-            }
+        if (InputManager.Instance == null) return;
 
-           
-            if (IsPaused)
-                Resume();
-            else
-                Pause();
+        if (!InputManager.Instance.PausePressed)
+                return;
+
+        if (currentMenu == MenuState.Options)
+        {
+            OnBackPressed();
+            return;
         }
+
+        SetPaused(Time.timeScale > 0f);
+        
     }
 
     public void OnResumePressed()
-    { 
-        Resume();
+    {
+        if (Time.timeScale == 0f)
+        {
+            Resume();
+        }
+        else
+        {
+            Pause();
+        }
     }
 
     public void OnOptionsPressed()
@@ -74,7 +79,7 @@ public class PauseController : MonoBehaviour
 
     public void Pause()
     {
-        MusicManager.Instance.SetGameState(MusicManager.GameState.Pause);
+        MusicManager.Instance.ApplyState(GameState.Pause);
         currentMenu = MenuState.Pause;
 
         Time.timeScale = 0f;
@@ -88,12 +93,13 @@ public class PauseController : MonoBehaviour
         if (hudPanel != null)
             hudPanel.SetActive(false);
 
-        AudioListener.pause = true;
+ 
     }
+
 
     public void Resume()
     {
-        MusicManager.Instance.SetGameState(MusicManager.GameState.Gameplay);
+        MusicManager.Instance.ApplyState(GameState.Gameplay);
         currentMenu = MenuState.Gameplay;
         Time.timeScale = 1f;
 
@@ -106,7 +112,7 @@ public class PauseController : MonoBehaviour
         if (hudPanel != null)
             hudPanel.SetActive(true);
 
-        AudioListener.pause = false;
+
     }
 
     private enum MenuState
@@ -124,4 +130,27 @@ public class PauseController : MonoBehaviour
         Gameplay,
         UI
     }
+
+    private void SetPaused(bool paused)
+    {
+        currentMenu = paused ? MenuState.Pause : MenuState.Gameplay;
+
+        Time.timeScale = paused ? 0f : 1f;
+
+        pauseMenuPanel?.SetActive(paused);
+        optionsPanel?.SetActive(false);
+        hudPanel?.SetActive(!paused);
+
+        if (paused)
+        {
+            MusicManager.Instance.ApplyState(GameState.Pause);
+        }
+        else
+        {
+            MusicManager.Instance.StopAllSecondaryMusic();
+            MusicManager.Instance.ApplyState(GameState.Gameplay);
+        }
+    }
+
+
 }

@@ -14,6 +14,8 @@ public class GameOverMenu : MonoBehaviour
     public void RetryGame()
     {
         Time.timeScale = 1f; // safety reset
+        MusicManager.Instance.ResetAudioState();
+        FindObjectOfType<AudioStressController>()?.ResetHeartbeat();
         SceneManager.LoadScene(gameplaySceneName);
     }
 
@@ -21,6 +23,7 @@ public class GameOverMenu : MonoBehaviour
     public void QuitToMainMenu()
     {
         Time.timeScale = 1f;
+        MusicManager.Instance.ResetAudioState();
         SceneManager.LoadScene(mainMenuSceneName);
     }
 

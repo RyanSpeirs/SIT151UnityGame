@@ -9,7 +9,7 @@ public class MainMenuController : MonoBehaviour
     private void Start()
     {
         // Ensure correct game state + music
-        MusicManager.Instance.SetGameState(MusicManager.GameState.MainMenu);
+        MusicManager.Instance.ApplyState(GameState.MainMenu);
 
         // Make sure time is paused in menu
         Time.timeScale = 0f;
@@ -25,7 +25,7 @@ public class MainMenuController : MonoBehaviour
         SceneManager.LoadScene("GameScene");
 
         // Set gameplay music AFTER scene loads (important)
-        MusicManager.Instance.SetGameState(MusicManager.GameState.Gameplay);
+        MusicManager.Instance.ApplyState(GameState.Gameplay);
     }
 
     public void QuitGame()

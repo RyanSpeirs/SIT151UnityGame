@@ -1,13 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System.Runtime.CompilerServices;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UI;
 
 public class ShipGameMode : MonoBehaviour
 {
     public PlayerShipController player;
+
+    [Header("Level Setup")]
+    public string levelName = "Level1";
     
     // This is a flag that indicates if the game is over
     public bool gameOver = false;
@@ -16,7 +20,8 @@ public class ShipGameMode : MonoBehaviour
     public TextMeshProUGUI healthDisplay;
     public Slider healthBar;
 
-    
+   
+
     public AudioClip gameOverMusic;
 
     public int itemsCollected = 0;
@@ -42,9 +47,12 @@ public class ShipGameMode : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        InitialiseLevel();
         heartbeatSource.volume= 0f;
         heartbeatSource.loop = true;
         heartbeatSource.clip = heartbeatClip;
+
+        SetState(GameState.Gameplay);
     }
 
     // Update is called once per frame
@@ -70,6 +78,23 @@ public class ShipGameMode : MonoBehaviour
 
         Debug.Log(player.name + " HP: " + player.health);
 
+        if (InputManager.Instance.PausePressed)
+        {
+            if (CurrentState == GameState.Pause)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+
+    }
+
+    private void InitialiseLevel()
+    {
+        // 1. Tell MusicManager what level we're in
+        MusicManager.Instance.SetLevel(levelName);
+
+        // 2. Start gameplay music/state
+        SetState(GameState.Gameplay);
     }
 
     private void HandleHeartbeatSoundAndMusicEffects()
@@ -94,20 +119,35 @@ public class ShipGameMode : MonoBehaviour
         }
     }
 
+
+
+   // public void TriggerPause()
+   // {
+   //     
+   // }
+
+
+
     public void TriggerGameOver()
     {
-        Debug.Log("TriggerGameOver CALLED");
+    
+        if (CurrentState == GameState.GameOver) return;  // hard guard
 
-        if (gameOver) return; // hard guard
-
-        gameOver = true;
-
-        Debug.Log("Game Over Triggered ONCE");
+        SetState(GameState.GameOver);
 
         gameOverDisplay.gameObject.SetActive(true);
 
-        MusicManager.Instance.SetGameState(MusicManager.GameState.GameOver);
         StartCoroutine(GameOverSequence());
+    }
+
+    public void PauseGame()
+    {
+        SetState(GameState.Pause);
+    }
+
+    public void ResumeGame()
+    {
+        SetState(GameState.Gameplay);
     }
 
 
@@ -165,8 +205,8 @@ public class ShipGameMode : MonoBehaviour
     {
         gameOver = true;
 
-        // 1. Switch music state to Game Over (stop gameplay + play game over track)
-        MusicManager.Instance.SetGameState(MusicManager.GameState.GameOver);
+        // 1. Switch music state to Game Over (stop gameplay + play game over track) superceded by new design
+       
 
         // 2. Fade screen to black (gameplay layer transition)
         yield return StartCoroutine(FadeToBlack());
@@ -185,7 +225,23 @@ public class ShipGameMode : MonoBehaviour
 
         // 6. Wait for Game Over music to finish (optional cinematic pacing)
         yield return new WaitUntil(() =>
-            !MusicManager.Instance.musicSource.isPlaying);
+            !MusicManager.Instance.IsSecondaryMusicPlaying());
     }
+
+
+    public GameState CurrentState { get; private set; }
+
+    public void SetState(GameState newState)
+    {
+        if (CurrentState == newState) return;
+
+        CurrentState = newState;
+
+        Debug.Log("State changed to: " + newState);
+
+        MusicManager.Instance.ApplyState(newState);
+    }
+
+    
 }
 
