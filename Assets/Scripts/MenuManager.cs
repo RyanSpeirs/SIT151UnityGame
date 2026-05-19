@@ -6,9 +6,11 @@ public class MenuManager : MonoBehaviour
 {
     public static MenuManager Instance;
 
+    [Header("Menus")]
     public GameObject mainMenu;
     public GameObject pauseMenu;
     public GameObject optionsMenu;
+    public GameObject hud;
 
     private void Awake()
     {
@@ -17,32 +19,37 @@ public class MenuManager : MonoBehaviour
 
     public void ShowMainMenu()
     {
-        mainMenu.SetActive(true);
-        pauseMenu.SetActive(false);
-        optionsMenu.SetActive(false);
-        Time.timeScale = 0f;
+        SetAllHidden();
+
+        mainMenu?.SetActive(true);
     }
 
     public void ShowPauseMenu()
     {
-        pauseMenu.SetActive(true);
-        optionsMenu.SetActive(false);
-        Time.timeScale = 0f;
+        SetAllHidden();
+
+        pauseMenu?.SetActive(true);
     }
 
-    public void ShowOptions()
+    public void ShowOptionsMenu(bool fromPause = true)
     {
-        optionsMenu.SetActive(true);
+        SetAllHidden();
+
+        optionsMenu?.SetActive(true);
     }
 
-    public void ResumeGame()
+    public void ShowHUD()
     {
-        pauseMenu.SetActive(false);
-        Time.timeScale = 1f;
+        SetAllHidden();
+
+        hud?.SetActive(true);
     }
 
-    public void QuitGame()
+    public void SetAllHidden()
     {
-        Application.Quit();
+        mainMenu?.SetActive(false);
+        pauseMenu?.SetActive(false);
+        optionsMenu?.SetActive(false);
+        hud?.SetActive(false);
     }
 }

@@ -15,10 +15,16 @@ public class AudioManager : MonoBehaviour
     [Range(0f, 1f)] public float uiVolume = 1f;
     public AudioSource heartbeatSource;
     public AudioClip heartbeatClip;
-
+    [Range(0f, 1f)] public float heartbeatVolume = 0.5f;
 
     private const string SFX_KEY = "SFXVolume";
     private const string UI_KEY = "UIVolume";
+
+    public void Start()
+    {
+        uiVolume = PlayerPrefs.GetFloat(UI_KEY, 1f);
+        sfxVolume = PlayerPrefs.GetFloat(SFX_KEY, 1f);
+    }
 
     void Awake()
     {
@@ -39,9 +45,10 @@ public class AudioManager : MonoBehaviour
     {
         if (heartbeatSource != null && heartbeatClip != null)
         {
+            Debug.Log("Heartbeat PLAY called");
             heartbeatSource.clip = heartbeatClip;
             heartbeatSource.loop = true;
-            heartbeatSource.volume = 0.5f; // Adjust the volume as needed
+            heartbeatSource.volume =heartbeatVolume; // Adjust the volume as needed
             heartbeatSource.Play();
         }
     }
@@ -54,6 +61,8 @@ public class AudioManager : MonoBehaviour
             heartbeatSource.Stop();
         }
     }
+
+
 
 
     // ------------------------
@@ -86,7 +95,15 @@ public class AudioManager : MonoBehaviour
 
     public void PlayUISound(AudioClip clip)
     {
-        PlaySFX(clip, uiVolume);
+        if (clip == null || sfxPrefab == null) return;
+
+        AudioSource source = Instantiate(sfxPrefab, transform);
+        source.clip = clip;
+        source.volume = uiVolume;
+        source.Play();
+
+        Destroy(source.gameObject, clip.length);
+
     }
 
     //------------------------
@@ -98,4 +115,23 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.SetFloat(SFX_KEY, sfxVolume);
         PlayerPrefs.Save();
     }
+
+    //-----------------------
+    //  Stop Audio
+    //-----------------------
+    //  This is to help with certain audio issues on restart/retry
+    public void StopAllAudio()
+    {
+        StopAllCoroutines();
+
+        // stop all child audio sources (safe cleanup)
+        foreach (var source in GetComponentsInChildren<AudioSource>())
+        {
+            source.Stop();
+            Destroy(source.gameObject);
+        }
+    }
+
+
+
 }

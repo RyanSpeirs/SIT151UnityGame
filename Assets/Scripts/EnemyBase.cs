@@ -31,6 +31,10 @@ public class EnemyBase : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    protected virtual void Start()
+    {
+    }
+
     protected virtual void Update()
     {
         Move();

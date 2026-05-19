@@ -6,9 +6,10 @@ public class AudioStressController : MonoBehaviour
 {
     [Header("References")]
     public PlayerShipController player;
-    public AudioSource heartbeatSource;
-    public AudioLowPassFilter musicLowPass;
+    private AudioSource heartbeatSource;
     public AudioClip heartbeatClip;
+    public AudioLowPassFilter musicLowPass;
+    
 
     [Header("Heartbeat Settings")]
     public float heartbeatStartHP = 50f;
@@ -33,6 +34,7 @@ public class AudioStressController : MonoBehaviour
 
     void Update()
     {
+        if (player == null) return;
         float hp = player.health;
 
         UpdateHeartbeat(hp);
@@ -42,6 +44,10 @@ public class AudioStressController : MonoBehaviour
     void Awake()
     {
         Debug.Log("AudioStressController AWAKE on: " + gameObject.name);
+
+        heartbeatSource = gameObject.AddComponent<AudioSource>();
+        heartbeatSource.playOnAwake = false;
+        heartbeatSource.loop = false;
     }
 
     // --------------------------
@@ -51,7 +57,7 @@ public class AudioStressController : MonoBehaviour
     {
         if (hp <= heartbeatStartHP)
         {
-            if (!heartbeatActive)
+            if (heartbeatRoutine == null)
             {
                 heartbeatRoutine = StartCoroutine(HeartbeatLoop());
                 heartbeatActive = true;
@@ -64,11 +70,25 @@ public class AudioStressController : MonoBehaviour
         {
             if (heartbeatActive)
             {
-                StopCoroutine(heartbeatRoutine);
-                heartbeatActive = false;
+                StopHeartbeat();
             }
+        }
+    }
 
-            heartbeatIntensity = 0f;
+    void StopHeartbeat()
+    {
+        heartbeatActive = false;
+        heartbeatIntensity = 0f;
+
+        if (heartbeatRoutine != null)
+        {
+            StopCoroutine(heartbeatRoutine);
+            heartbeatRoutine = null;
+        }
+
+        if (heartbeatSource != null)
+        {
+            heartbeatSource.Stop();
         }
     }
 
@@ -76,8 +96,11 @@ public class AudioStressController : MonoBehaviour
     {
         while (true)
         {
+            if (heartbeatSource == null || heartbeatClip == null)
+                yield break;
+
             float volume = Mathf.Lerp(0.3f, 1f, heartbeatIntensity);
-            heartbeatSource.volume = volume;
+           
 
             heartbeatSource.PlayOneShot(heartbeatClip, volume);
 
@@ -129,5 +152,10 @@ public class AudioStressController : MonoBehaviour
         {
             heartbeatSource.Stop();
         }
+    }
+
+    void OnDisable()
+    {
+        StopHeartbeat();
     }
 }

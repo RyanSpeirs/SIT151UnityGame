@@ -18,11 +18,21 @@ public class OptionsMenu : MonoBehaviour
     public void OnEnable()
     {
         // Set initial values
-        musicSlider.value = MusicManager.Instance.MusicVolume;
-        sfxSlider.value = AudioManager.Instance.sfxVolume;
-        uiSlider.value = AudioManager.Instance.uiVolume;
+        if (musicSlider != null && MusicManager.Instance != null)
+        {
+            musicSlider.value = MusicManager.Instance.MusicVolume;
+        }
 
-      
+        if (sfxSlider != null && AudioManager.Instance != null)
+        {
+            sfxSlider.value = AudioManager.Instance.sfxVolume;
+        }
+
+        if (uiSlider != null && AudioManager.Instance != null)
+        {
+            uiSlider.value = AudioManager.Instance.uiVolume;
+        }
+
     }
 
     public void OnMusicChanged(float value)
@@ -47,13 +57,22 @@ public class OptionsMenu : MonoBehaviour
 
     void Awake()
     {
-        musicSlider.onValueChanged.RemoveAllListeners();
-        sfxSlider.onValueChanged.RemoveAllListeners();  
-        uiSlider.onValueChanged.RemoveAllListeners();   
+        if (musicSlider != null)
+        {
+            musicSlider.onValueChanged.RemoveAllListeners();
+            musicSlider.onValueChanged.AddListener(OnMusicChanged);
+        }
 
-        // Hook events
-        musicSlider.onValueChanged.AddListener(OnMusicChanged);
-        sfxSlider.onValueChanged.AddListener(OnSFXChanged);
-        uiSlider.onValueChanged.AddListener(OnUIChanged);
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveAllListeners();
+            sfxSlider.onValueChanged.AddListener(OnSFXChanged);
+        }
+
+        if (uiSlider != null)
+        {
+            uiSlider.onValueChanged.RemoveAllListeners();
+            uiSlider.onValueChanged.AddListener(OnUIChanged);
+        }
     }
 }

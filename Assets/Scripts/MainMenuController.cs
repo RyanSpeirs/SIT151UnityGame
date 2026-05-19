@@ -5,36 +5,46 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public MainMenuManager menuManager;
+
     private void Start()
     {
-        // Ensure correct game state + music
-        MusicManager.Instance.ApplyState(GameState.MainMenu);
-
-        // Make sure time is paused in menu
         Time.timeScale = 0f;
 
-        // Open the main menu UI
-        MenuManager.Instance.ShowMainMenu();
+        menuManager.ShowMainMenu();
+
+        MusicManager.Instance.ApplyState(GameState.MainMenu);
     }
 
-    public void StartGame()
+    public void NewGame()
     {
         Time.timeScale = 1f;
-
         SceneManager.LoadScene("GameScene");
-
-        // Set gameplay music AFTER scene loads (important)
-        MusicManager.Instance.ApplyState(GameState.Gameplay);
     }
 
-    public void QuitGame()
+    public void LoadGame()
     {
-        Application.Quit();
+        // Placeholder for now
+        Debug.Log("Load Game not implemented yet");
     }
 
     public void OpenOptions()
     {
-        MenuManager.Instance.ShowOptions();
+        menuManager.ShowOptionsMenu();
+    }
+
+    public void OpenCredits()
+    {
+        Debug.Log("Credits not implemented yet");
+        // later: MenuManager.Instance.ShowCredits();
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

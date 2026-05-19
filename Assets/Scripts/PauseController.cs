@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static MusicManager;
+using UnityEngine.SceneManagement;
 
 
 public class PauseController : MonoBehaviour
@@ -113,6 +114,16 @@ public class PauseController : MonoBehaviour
             hudPanel.SetActive(true);
 
 
+    }
+
+    public void QuitToMainMenu()
+    {
+        Time.timeScale = 1f; // IMPORTANT: reset time first
+
+        // optional cleanup
+        MusicManager.Instance.ResetAudioState();
+
+        SceneManager.LoadScene("MainMenu");
     }
 
     private enum MenuState

@@ -11,6 +11,7 @@ public class MusicManager : MonoBehaviour
     public AudioSource gameplaySource;
     public AudioSource secondarySource;
 
+
     [Header("Level Music Database")]
     public List<LevelAudioProfile> levelProfiles;
 
@@ -23,6 +24,7 @@ public class MusicManager : MonoBehaviour
     public float mainmenuMultiplier = 1.0f;
 
     private bool gameplayWasPaused;
+    private bool hasInitialisedState = false;
 
     public AudioClip mainmenuMusic;
     public AudioClip gameplayMusic;
@@ -39,7 +41,7 @@ public class MusicManager : MonoBehaviour
 
     private const string MUSIC_KEY = "MusicVolume";
 
-    public GameState CurrentState { get; private set; } = GameState.Gameplay;
+    public GameState CurrentState { get; private set; }
     void Awake()
     {
         if (Instance == null)
@@ -110,10 +112,7 @@ public class MusicManager : MonoBehaviour
     {
         if (secondarySource == null || clip == null) return;
 
-        // Prevent replaying one-shot clips
-        if (!loop && lastOneShotClip == clip && secondarySource.isPlaying == false)
-            return;
-
+       
         if (secondarySource.clip == clip && secondarySource.isPlaying)
             return;
 
@@ -190,6 +189,14 @@ public class MusicManager : MonoBehaviour
     // ------------------------
     public void ApplyState(GameState state)
     {
+
+        if (hasInitialisedState && CurrentState == state)
+            return;
+
+        hasInitialisedState = true;
+        CurrentState = state;
+
+
         switch (state)
         {
             case GameState.MainMenu:
@@ -358,7 +365,7 @@ public class MusicManager : MonoBehaviour
     {
         gameplaySource.Stop();
         secondarySource.Stop();
-
+        lastOneShotClip = null;
         gameplayWasPaused = false;
         musicFadeMultiplier = 1f;
 
@@ -374,5 +381,5 @@ public class MusicManager : MonoBehaviour
         secondarySource.clip = null;
     }
 
-
+   
 }

@@ -8,7 +8,8 @@ public class PlayerShipController : MonoBehaviour
     public GameObject bulletTemplate;
     public float health = 100.0f;
     public ShipGameMode gameMode;
-    private AudioSource audioSource;
+
+    public AudioClip shootClip;
 
     private Camera mainCamera;
 
@@ -18,7 +19,7 @@ public class PlayerShipController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        
         mainCamera = Camera.main;
     }
 
@@ -57,7 +58,8 @@ public class PlayerShipController : MonoBehaviour
               transform.position += new Vector3(0.00f, -0.01f, 0.0f);
           }  */
 
-        if (gameMode != null && gameMode.gameOver) return;
+        if (gameMode != null && gameMode.CurrentState == GameState.GameOver)
+            return;
 
         // --- FIRE ---
         if (InputManager.Instance != null && InputManager.Instance.FirePressed)
@@ -68,7 +70,12 @@ public class PlayerShipController : MonoBehaviour
                 transform.rotation
             );
 
-            audioSource.Play();
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(shootClip);
+            }
+
+            AudioManager.Instance.PlaySFX(shootClip);
         }
 
         // --- MOVEMENT ---

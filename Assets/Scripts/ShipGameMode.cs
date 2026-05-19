@@ -14,7 +14,7 @@ public class ShipGameMode : MonoBehaviour
     public string levelName = "Level1";
     
     // This is a flag that indicates if the game is over
-    public bool gameOver = false;
+   
 
     //  Handles for the Health UI
     public TextMeshProUGUI healthDisplay;
@@ -26,8 +26,7 @@ public class ShipGameMode : MonoBehaviour
 
     public int itemsCollected = 0;
 
-    public AudioSource heartbeatSource;
-    public AudioClip heartbeatClip;
+
     public float heartbeatThreshold = 30f;
     private float heartbeatMaxVolume = 1f;
 
@@ -44,28 +43,33 @@ public class ShipGameMode : MonoBehaviour
     public float uiFadeDuration = 1f;
 
 
-    // Start is called before the first frame update
-    void Start()
+    //  I made this a coroutine due to some timing issues 
+    IEnumerator Start()
     {
-        InitialiseLevel();
-        heartbeatSource.volume= 0f;
-        heartbeatSource.loop = true;
-        heartbeatSource.clip = heartbeatClip;
+        //  By having a brief 1f pause, we can get the state system to apply correctly
+        //  Otherwise in order for music to play we would need to pause/unpause.
+        yield return null;
 
+
+        MusicManager.Instance.ResetAudioState();
+        AudioManager.Instance.StopAllAudio();
+
+
+        InitialiseLevel();
         SetState(GameState.Gameplay);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("ShipGameMode Update running");
+      
 
         //  Updates both UI Health indicators
         healthDisplay.text = "Health: " + player.health + "%";
         healthBar.value = player.health;
 
-       if (!gameOver && player.health <= 0.01f)
-       {
+        if (CurrentState != GameState.GameOver && player.health <= 0)
+        {
             Debug.Log("GAME OVER TRIGGER CONDITION MET: " + player.health);
             player.health = 0;
             TriggerGameOver();
@@ -76,15 +80,9 @@ public class ShipGameMode : MonoBehaviour
             TriggerGameOver();
         }
 
-        Debug.Log(player.name + " HP: " + player.health);
 
-        if (InputManager.Instance.PausePressed)
-        {
-            if (CurrentState == GameState.Pause)
-                ResumeGame();
-            else
-                PauseGame();
-        }
+
+        HandlePauseInput();
 
     }
 
@@ -97,27 +95,7 @@ public class ShipGameMode : MonoBehaviour
         SetState(GameState.Gameplay);
     }
 
-    private void HandleHeartbeatSoundAndMusicEffects()
-    {
-        // If health is below 30%, start playing the heartbeat sound and reduce music volume
-        if (player.health < 30f)
-        {
-            // Trigger heartbeat sound if it's not already playing
-            if (!heartbeatSource.isPlaying) // Only start if it's not already playing
-            {
-                AudioManager.Instance.PlayHeartbeatSound();
-            }
-            // Apply muffling effect to music
-           
-        }
-        else
-        {
-            // Stop heartbeat sound if health is above threshold
-            AudioManager.Instance.StopHeartbeatSound();
-            // Remove muffling effect from music
-            
-        }
-    }
+  
 
 
 
@@ -203,7 +181,7 @@ public class ShipGameMode : MonoBehaviour
 
     IEnumerator GameOverSequence()
     {
-        gameOver = true;
+        
 
         // 1. Switch music state to Game Over (stop gameplay + play game over track) superceded by new design
        
@@ -220,16 +198,19 @@ public class ShipGameMode : MonoBehaviour
         gameOverCanvasGroup.interactable = false;
         gameOverCanvasGroup.blocksRaycasts = false;
 
+        
         // 5. Fade in Game Over UI
         yield return StartCoroutine(FadeInUI(gameOverCanvasGroup));
 
         // 6. Wait for Game Over music to finish (optional cinematic pacing)
         yield return new WaitUntil(() =>
             !MusicManager.Instance.IsSecondaryMusicPlaying());
+
+        StartCoroutine(StopHeartbeatAfterDelay(3f));
     }
 
 
-    public GameState CurrentState { get; private set; }
+    public GameState CurrentState { get; private set; } = (GameState)(-1);
 
     public void SetState(GameState newState)
     {
@@ -242,6 +223,29 @@ public class ShipGameMode : MonoBehaviour
         MusicManager.Instance.ApplyState(newState);
     }
 
-    
+    private void HandlePauseInput()
+    {
+        if (InputManager.Instance == null) return;
+
+        if (!InputManager.Instance.PausePressed) return;
+
+        if (CurrentState == GameState.Pause)
+            ResumeGame();
+        else
+            PauseGame();
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+    }
+
+    private IEnumerator StopHeartbeatAfterDelay(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+
+        AudioManager.Instance.StopHeartbeatSound();
+    }
+
 }
 

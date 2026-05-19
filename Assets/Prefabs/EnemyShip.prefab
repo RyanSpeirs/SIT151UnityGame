@@ -120,7 +120,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19d60860efed5854aa591f99f52163c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 1
   explosion: {fileID: 9100000, guid: f0bcc492b85a4654fa7f7c845fa6a9bb, type: 2}
+  deathDelay: 2
+  destroyWhenOffscreen: 1
+  maxHealth: 1
 --- !u!136 &-3788421825842803169
 CapsuleCollider:
   m_ObjectHideFlags: 0
